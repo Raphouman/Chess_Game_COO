@@ -68,7 +68,7 @@ public class ChessGame extends Observable implements BoardGames{
 			echiquier.switchJoueur();
 		}		
 		
-		this.notifyObservers(echiquier.getPiecesIHM()); 
+		this.notifyObservers(echiquier.getPiecesIHM());
 		return ret;	
 	}
 
@@ -98,7 +98,7 @@ public class ChessGame extends Observable implements BoardGames{
 	 */
 	@Override
 	public void	notifyObservers(Object arg) {
-		super.setChanged();
+		super.setChanged();	// pour forcer la notification même si l'état de l'objet n'a pas changé
 		super.notifyObservers(arg); 
 	}
 

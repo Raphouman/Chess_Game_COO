@@ -52,7 +52,14 @@ public abstract class AbstractPiece implements Pieces {
 
     @Override
     public boolean capture() {
-        return false;
+        if (this.x ==-1 &&  this.y == -1){
+            return false;
+        }
+        else {
+            this.x = -1;    // coords d'une pièce capturées
+            this.y = -1;
+            return true;
+        }
     }
 
 

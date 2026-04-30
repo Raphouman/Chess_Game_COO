@@ -1,9 +1,9 @@
 // ChessImageProvider.java ==> cherche l'image d'une pièce dans images/... (paramètres : type de pièce + couleur)
 package tools;	//ca import tout seul tools.ChessPieceImage
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URL;
 import model.Coord;
 import model.Couleur;
 
@@ -37,16 +37,16 @@ public class ChessImageProvider {
 	/**
 	 * @param pieceType
 	 * @param pieceCouleur
-	 * @return nom fichier contenant image de la pi�ce
+	 * @return ressource contenant l'image de la pièce
 	 */
-	public static String getImageFile(String pieceType, Couleur pieceCouleur){
-		String ret, key, value;
-		ret = null;
+	public static URL getImageFile(String pieceType, Couleur pieceCouleur){
+		String key, value;
 		key = pieceType + pieceCouleur.name();
 		value = mapImage.get(key);
-		File g=new File("");
-		ret = g.getAbsolutePath() + File.separator + "images" + File.separator + value;
-		return ret;		
+		if (value == null) {
+			return null;
+		}
+		return ChessImageProvider.class.getResource("/images/" + value);	// src/images dans le classpath
 	}
 
 	// ------------------------------------------------------------------

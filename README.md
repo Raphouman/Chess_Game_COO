@@ -23,46 +23,37 @@ The `JAVA PROJECTS` view allows you to manage your dependencies. More details ca
 # @TODO
 Ce qui est commencé mais incomplet (@TODO)
 
-┌──────────────────────────────┬───────────────────────────────────────────────────┐
-│        Fonctionnalité        │                       État                        │
-├──────────────────────────────┼───────────────────────────────────────────────────┤
-│ isEnd() dans Echiquier       │ retourne false en dur                             │
-├──────────────────────────────┼───────────────────────────────────────────────────┤
-│ pawnPromotion() dans Jeu     │ retire le pion mais ne crée pas la nouvelle pièce │
-├──────────────────────────────┼───────────────────────────────────────────────────┤
-│ capture() dans AbstractPiece │ retourne false en dur                             │
-├──────────────────────────────┼───────────────────────────────────────────────────┤
-│ isCaptureMove() dans Pion    │ retourne false en dur                             │
-├──────────────────────────────┼───────────────────────────────────────────────────┤
-│ Obstacles sur le chemin      │ pas encore implémenté                             │
-├──────────────────────────────┼───────────────────────────────────────────────────┤                                                                                 
-│ Roque (setCastling())        │ squelette vide                                    │
-├──────────────────────────────┼───────────────────────────────────────────────────┤                                                                                 
-│ undoMove() / undoCapture()   │ commentés, pas commencés                          │                                                                               
-└──────────────────────────────┴───────────────────────────────────────────────────┘
-                                                                                                                                                                     
----                                                                                                                                                                  
-Dernières modifications (selon timestamps)
+| Fonctionnalité | État |
+|---|---|
+| `isEnd()` dans Echiquier | retourne false en dur |
+| `pawnPromotion()` dans Jeu | retire le pion mais ne crée pas la nouvelle pièce |
+| `capture()` dans AbstractPiece | FAIT — met x=-1, y=-1 |
+| `isCaptureMove()` dans Pion | FAIT — prise diagonale |
+| Obstacles sur le chemin | FAIT — dans `Echiquier.isMoveOk()` check 4 |
+| Roque (`setCastling()`) | squelette vide |
+| `undoMove()` / `undoCapture()` | commentés, pas commencés |
 
-1. Jeu.java — isPawnPromotion() + squelette pawnPromotion() + setCastling()
-2. Echiquier.java — dernière modifiée : logique de validation isMoveOk() avec messages d'erreur
-3. Echiquier.java getPiecesIHM() — dernière modifiée : ajout de la logique pour retourner une liste des pièces des 2 jeux
-  
----
 ---
 
-# 2eme ITERATION : IHM en mode graphique
-Inspirez-vous de l’exemple pour identifier vos premiers attributs et coder votre constructeur. Ce dernier
-construit le plateau de l'échiquier sous forme de damier 8*8, et le rend écoutable par les évènements
-MouseListener et MouseMotionListener.
- Créez dans un 1er temps un damier vide (sans les images des pièces) et testez.
+# 2eme ITERATION : IHM en mode graphique — FAIT (2026-04-30)
 
-@TODO :
- Ajoutez les pièces à leur position initiale en vous servant des méthodes de la classe
-ChessImageProvider et testez. ==> FAIT
+## Ce qui a été implémenté
 
-A FAIRE :
- Programmez les déplacements et testez :
-Votre vue (classe ChessGameGUI) observe votre modèle (classe ChessGame) et doit être munie
-d’une méthode update() qui a la responsabilité de rafraichir l’affichage après un déplacement,
-une promotion du pion, etc. ...
+**ChessGameGUI (vue)**
+- `update()` : vide les 64 cases et redessine depuis la liste `PieceIHM` envoyée par le modèle (patron Observer)
+- `mousePressed()` : saisit la pièce sous la souris, la place sur la `DRAG_LAYER`
+- `mouseDragged()` : déplace la pièce avec la souris
+- `mouseReleased()` : vérifie le tour du joueur, appelle `chessGameControler.move()`, affiche le message console
+
+**ChessGameControler**
+- `isPlayerOK()` : compare la couleur de la pièce cliquée avec le joueur courant
+
+**Echiquier / Jeu — corrections et ajouts**
+- Suppression du double `switchJoueur()` (bug : le tour ne changeait jamais)
+- `Echiquier.isMoveOk()` : 6 checks (pièce présente, destination différente, règle pièce, obstacles alliés+adverses sur le chemin, pas d'allié à destination, capture)
+- `AbstractPiece.capture()` : met x=-1, y=-1 pour marquer une pièce comme capturée
+- `Jeu.capture(x,y)` : délègue à `piece.capture()`
+- `Jeu.move()` : déplace directement sans re-valider (Echiquier a déjà validé)
+- `Pion.isAlgoMoveOk()` : avance de 2 cases autorisée depuis la ligne de départ
+- `Pion.isCaptureMove()` : prise diagonale (x±1, y+direction)
+- Bloc pion dans `Echiquier.isMoveOk()` : autorise la diagonale si ennemi présent, bloque la capture vers l'avant

@@ -78,16 +78,50 @@ public class Echiquier implements BoardGames{
         }
 
         // 3. mouvement valide pour la pièce (et dans le plateau) ?
-        if (!jeuCourant.isMoveOk(xSrc, ySrc, xDest, yDest)) {
+        Pieces movedPiece = jeuCourant.findPiece(xSrc, ySrc);
+        boolean isNormalMove  = jeuCourant.isMoveOk(xSrc, ySrc, xDest, yDest);
+        boolean isPawnCapture = (movedPiece instanceof Pion)
+                && ((Pion) movedPiece).isCaptureMove(xDest, yDest)
+                && jeuAdverse.findPiece(xDest, yDest) != null;
+
+        if (!isNormalMove && !isPawnCapture) {
             setMessage("KO : mouvement interdit pour cette pièce");
             return false;
         }
+        // Le pion ne peut pas capturer en avançant tout droit
+        if (isNormalMove && movedPiece instanceof Pion && jeuAdverse.findPiece(xDest, yDest) != null) {
+            setMessage("KO : le pion ne peut pas capturer en avançant");
+            return false;
+        }
 
-        //️ PAS ENCORE :
-        // - obstacles
-        // - captures
+        // 4. aucune pièce (alliée ou adverse) ne bloque le trajet intermédiaire
+        if (!(movedPiece instanceof Cavalier)) {
+            int dx = Integer.signum(xDest - xSrc); // signum(n) = -1 si n<0 , =0 si n==0, =1 si n>0
+            int dy = Integer.signum(yDest - ySrc);
+            int cx = xSrc + dx;
+            int cy = ySrc + dy;
+            while (cx != xDest || cy != yDest) {
+                if (jeuCourant.findPiece(cx, cy) != null || jeuAdverse.findPiece(cx, cy) != null) {
+                    setMessage("KO : pièce sur le chemin");
+                    return false;
+                }
+                cx += dx;
+                cy += dy;
+            }
+        }
 
-        setMessage("OK : déplacement simple");
+        // 5. destination pas occupée par une pièce alliée ?
+        if (jeuCourant.findPiece(xDest, yDest) != null) {
+            setMessage("KO : case occupée par une pièce alliée");
+            return false;
+        }
+
+        // 6. capture si pièce adverse à destination
+        if (jeuAdverse.findPiece(xDest, yDest) != null) {
+            setMessage("OK : déplacement + capture");
+        } else {
+            setMessage("OK : déplacement simple");
+        }
         return true;
     }
 
@@ -98,8 +132,12 @@ public class Echiquier implements BoardGames{
             return false;
         }
 
+        // Capturer la pièce adverse si la destination est occupée
+        if (jeuAdverse.findPiece(xDest, yDest) != null) {
+            jeuAdverse.capture(xDest, yDest);
+        }
+
         boolean moved = jeuCourant.move(xSrc, ySrc, xDest, yDest);
-        if (moved) {switchJoueur();}
         return moved;
     }
 

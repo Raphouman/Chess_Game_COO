@@ -26,8 +26,9 @@ public class ChessGameControler extends AbstractChessGameControler {
 	 */
 	@Override
 	public boolean isPlayerOK(Coord initCoord) {
-		// ToDo (là j'ai juste corriger l'erreur en mettant nimp quoi)
-		return true;
+		model.Couleur pieceCouleur = getPieceColor(initCoord);
+		if (pieceCouleur == null) return false;
+		return pieceCouleur.equals(getColorCurrentPlayer());
 	}
 	
 	/* (non-Javadoc)

@@ -118,7 +118,7 @@ JFrame (ChessGameGUIProf)                    <-- container racine (fenêtre prin
 │       └── GridLayout(8,8)
 │           ├── JPanel square[0][0]          <-- component case = 1 case du damier (case de la pièce JLabel)
 │           │   └── JLabel (pièce, optionnel)           <-- Image de la pièce sur la case (ex : TourBlancS.png) ou la Pièce en elle même (ex : TourBlanche)
-│           └── ... 64 cases ...
+│           └── ... 63 autres cases ...
 └── DRAG_LAYER:                              <-- pour la pièce en cours de déplacement (JLabel de la pièce ajoutée tempo dans layeredPane en DRAG_LAYER pendant le drag)
 └── JLabel pieceToMove (temporaire pendant drag)
 
@@ -160,6 +160,8 @@ JFrame (ChessGameGUIProf)                    <-- container racine (fenêtre prin
     -   **sens de communication PAR REFERENCE** : la Vue connait le Controler qui connait le Model, et le Model ne connait rien.
     -   **sens de communication PAR OBSERVATION** : la Vue observe le Model pour se faire notifier des changements d'état, et la vue ne connait pas le Model : c'est le **Model qui notifie la Vue**
 
+![img.png](Observable_Observer.png)
+
 - Or ici, on aura besoin de l'un pour créer l'autre et vice versa donc on va faire en sorte que la vue est un comportement d'**Observer** pour se faire notifier des changements d'état du **modèle** et rafraichir l'affichage en conséquence.
 Mais elle n'a pas besoin de savoir quel **observé** elle observe.
 - De même, le modèle a un comportement de **Subject / Observé** pour notifier les changements d'état aux **observers** (la vue), mais il n'a pas besoin de savoir qui sont les **observers**.
@@ -167,13 +169,13 @@ Mais elle n'a pas besoin de savoir quel **observé** elle observe.
 ### Roles
 - **Model (M) ==> ChessGame.java** : classes metier dans `model/` (`Echiquier`, `Pieces`, `Coord`, etc.). 
 Va implémenter un comportement de **Subject / Observé** pour notifier les changements d'état aux **observers** (la vue).
-==> `Col <observer>;` et `addObserver(observer);` et `notifyObservers();`
+==> `Col <observer>;` et `addObserver(observer);` et `notifyObservers()`; et `setChanged()` pour **notifier** les observers des changements d'état.
 
 - **View (V) ==> ChessGameGUI.java** : classes de `vue/` (`ChessGameGUI`) qui affichent le plateau et captent les evenements utilisateur.
 Va implémenter un comportement d'**Observer** pour se faire notifier des changements d'état du **modèle** et rafraichir l'affichage en conséquence.
 ==> `implements Observer` et `update(Params)` pour rafraichir l'affichage.
 
-- **Controller (C) ==> ChessGameControler** : classes de `controler/` (`ChessGameControlers`) qui recoivent les actions de la vue et pilotent le modele.
+- **Controller (C) ==> ChessGameControler** : classes de `controler/controler.local/` (`ChessGameControlers`) qui recoivent les actions de la vue et pilotent le modele.
 
 ### Flux (dans le projet)
 
@@ -182,7 +184,7 @@ Utilisateur (drag/drop souris)
    -> View (`ChessGameGUI`) capte `MouseEvent`
    -> Controller (`move(initCoord, finalCoord)`)
    -> Model (`Echiquier`) valide + met a jour l'etat
-   -> Notification (`Observer.update(...)`)
+   -> Notification (`Observer.update(...)`) ==> UPDATE Chez la VUE
    -> View rafraichit les components (`JPanel`, `JLabel` ...)
 ```
 
@@ -212,3 +214,18 @@ Update(Params = ListPiece**IHM**) : la vue reçoit une liste de pièces **à aff
 De même, le modèle peut notifier les changements d'état sans se soucier de qui sont les observers ou comment ils vont réagir.
 
 Donc on en retient 2 pour le **découplage** : SRP (chacun sa mission) et O/C (ajouter de nouvelles fonctionnalités sans modifier le code existant).
+
+---
+---
+
+# 30 AVRIL 2026
+## DESIGN PATTERNS 
+Revoir template methode (ex : isMoveOk() + isAlgoMoveOk()) 
+
+## OBSERVER & Observable
+![img.png](Observable_Observer.png)
+
+---
+## Polymorphisme paramétrique
+- **Classe paramétrée** : classe qui peut être utilisée avec différents types de données (ex : List<T> en Java).
+- **Généricité** : capacité d'une classe ou d'une méthode à fonctionner avec différents types de données sans modification du code (ex : List<T> peut être utilisée pour List<String>, List<Integer>, etc.).

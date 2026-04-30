@@ -69,20 +69,28 @@ public class Jeu {    //pas abstract car instance de Jeu
         return null;    //obligatoire car on a spécifié que la fonction renvoyait un objet de type String
     }
 
-    // ------------------------------------------------------------------
+    // --------------------------- MOVE ---------------------------------------
 
     public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal){
         Pieces p_to_move = findPiece(xInit, yInit);
-        if (p_to_move == null){return false;}
-        return p_to_move.isMoveOk(xFinal, yFinal);   //appel isMoveOk de la classe de la pièce à déplacer (passe par Abstractpiece), qui vérifie si le déplacement est valide généralement PUIS pour ce type de pièce spécifique (la sous classe)
+        if (p_to_move == null) return false;
+        return p_to_move.isMoveOk(xFinal, yFinal);  // vérifie uniquement la règle de la pièce
     }
+
+
     public boolean move(int xInit, int yInit, int xFinal, int yFinal){
-        if (isMoveOk(xInit, yInit, xFinal, yFinal)){
-            Pieces p_to_move = findPiece(xInit, yInit);
-            p_to_move.move(xFinal, yFinal);   //appel move de la classe AbstractPiece qui met à jour les coordonnées de la pièce
-            return true;
-        }
-        return false;
+        Pieces p_to_move = findPiece(xInit, yInit);
+        if (p_to_move == null) return false;
+        // pas de re-validation : Echiquier.isMoveOk() a déjà tout vérifié
+        ((AbstractPiece) p_to_move).x = xFinal;
+        ((AbstractPiece) p_to_move).y = yFinal;
+        return true;
+    }
+
+    public boolean capture(int x, int y) {
+        Pieces p = findPiece(x, y);
+        if (p == null) return false;
+        return p.capture();  // met x=-1,y=-1 → exclue de getPiecesIHM()
     }
 
     //-----------------------------------------------------------------------
@@ -142,14 +150,16 @@ public class Jeu {    //pas abstract car instance de Jeu
             for ( PieceIHM pieceIHM : list){
                 if ((pieceIHM.getTypePiece()).equals(piece.getClass().getSimpleName())){  
                     existe = true;
-                    if (piece.getX() != -1){   
+
+                    //update ne dessinera plus les pièces capturées
+                    if (piece.getX() != -1 && piece.getY() != -1){  // on ne prend plus en compte les pièces capturées
                         pieceIHM.add(new Coord(piece.getX(), piece.getY()));
                     }               
                 }
             }
             // sinon, création d'une nouvelle PieceIHM si la pièce est toujours en jeu
             if (! existe) {
-                if (piece.getX() != -1){
+                if (piece.getX() != -1 &&  piece.getY() != -1){
                     newPieceIHM = new PieceIHM(piece.getClass().getSimpleName(),
                                                             piece.getCouleur());
                     newPieceIHM.add(new Coord(piece.getX(), piece.getY()));
@@ -162,7 +172,6 @@ public class Jeu {    //pas abstract car instance de Jeu
 
 
     //@TODO plus tard
-    // public boolean capture()
     // public void setPossibleCapture()  // Si une capture d'une pièce de l'autre jeu est possible met à jour 1 booléen
     //public void undoMove()  // annule le dernier déplacement effectué (pour la fonction "annuler" de l'IHM)
     //public void undoCapture()  // annule la dernière capture effectuée (pour la fonction "annuler" de l'IHM)
