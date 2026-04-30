@@ -59,7 +59,7 @@ public class Echiquier implements BoardGames{
     // --- Helpers échec / mat / pat ---
 
     private boolean isPathBlocked(int xSrc, int ySrc, int xDest, int yDest) {
-        int dx = Integer.signum(xDest - xSrc);
+        int dx = Integer.signum(xDest - xSrc);  // signum(n) : =-1 si n<0, =0 si n=0, =1 si n>0
         int dy = Integer.signum(yDest - ySrc);
         int cx = xSrc + dx;
         int cy = ySrc + dy;
@@ -71,41 +71,43 @@ public class Echiquier implements BoardGames{
         return false;
     }
 
-    private boolean isSquareAttacked(int x, int y, Jeu attacker) {
-        for (Pieces p : attacker.getPieces()) {
-            if (p.getX() == -1) continue;
+    private boolean isSquareAttacked(int x, int y, Jeu attacker) {  // est ce que le roi est en échec
+        for (Pieces p : attacker.getPieces()) {             // on récup les pièces adverses
+            if ((p.getX() == -1) && (p.getY() == -1)) continue;
             if (p instanceof Pion) {
-                if (((Pion) p).isCaptureMove(x, y)) return true;
-            } else if (p instanceof Cavalier) {
+                if (((Pion) p).isCaptureMove(x, y)) return true;    // on regarde si c'est un pion qui prend le roi
+            } else if (p instanceof Cavalier) {                 // on regarde si c'est le cavalier (pas de chek de si le chemin est bloqué)
                 if (p.isMoveOk(x, y)) return true;
-            } else {
+            } else {                // pour toutes autres pièces on regarde si le mouvement sur la case du roi est possible et si le chemin n'est pas bloqué
                 if (p.isMoveOk(x, y) && !isPathBlocked(p.getX(), p.getY(), x, y)) return true;
             }
         }
         return false;
     }
 
-    public boolean isInCheck(Jeu jeu, Jeu adversaire) {
+    public boolean isInCheck(Jeu jeu, Jeu adversaire) {         //la fonction qu'on va appeler pour vérif si il est en échec ou non
         Coord king = jeu.getKingCoord();
         if (king == null) return false;
         return isSquareAttacked(king.getX(), king.getY(), adversaire);
     }
 
-    private boolean doesNotLeaveKingInCheck(int xSrc, int ySrc, int xDest, int yDest) {
-        Pieces moving = jeuCourant.findPiece(xSrc, ySrc);
+    // appelé dans isMoveOk (étape 7)
+    private boolean doesNotLeaveKingInCheck(int xSrc, int ySrc, int xDest, int yDest) { // Quand le roi et en echec, est ce que le mouvement le laisse en echec ou le sauve ?
+        Pieces moving = jeuCourant.findPiece(xSrc, ySrc);   //le jeu courant : où le roi est actuellement  en echec !
         Pieces captured = jeuAdverse.findPiece(xDest, yDest);
-        int capX = (captured != null) ? captured.getX() : 0;
+        int capX = (captured != null) ? captured.getX() : 0;    //on récup les coords de la pièce à capturer
         int capY = (captured != null) ? captured.getY() : 0;
 
-        ((AbstractPiece) moving).x = xDest;
+        ((AbstractPiece) moving).x = xDest;         // on SIMULE et on déplace vraiment la pièce du jeu courant
         ((AbstractPiece) moving).y = yDest;
-        if (captured != null) {
+        if (captured != null) {                     // si il y a bien une pièce à capturer, on SIMULE en la mettant avec les autres pièces capturées (hors du jeu)
             ((AbstractPiece) captured).x = -1;
             ((AbstractPiece) captured).y = -1;
         }
 
-        boolean safe = !isInCheck(jeuCourant, jeuAdverse);
+        boolean safe = !isInCheck(jeuCourant, jeuAdverse);  // on CHEK si le roi est en echec après simulation (donc le reste)
 
+        // On oublie pas de remettre les pièces à leur place d'avant la SIMULATION (ce n'est pas cette méthode qui gère les vrais déplacements !!!)
         ((AbstractPiece) moving).x = xSrc;
         ((AbstractPiece) moving).y = ySrc;
         if (captured != null) {
@@ -115,13 +117,15 @@ public class Echiquier implements BoardGames{
         return safe;
     }
 
+    // appelée dans isEnd()
+    // vérifie si il existe un déplacement légal ou si il y a une victoire de l'adversaire
     private boolean hasLegalMove() {
         String saved = this.message;
         for (Pieces p : jeuCourant.getPieces()) {
             if (p.getX() == -1) continue;
             for (int xDest = 0; xDest < 8; xDest++) {
                 for (int yDest = 0; yDest < 8; yDest++) {
-                    if (isMoveOk(p.getX(), p.getY(), xDest, yDest)) {
+                    if (isMoveOk(p.getX(), p.getY(), xDest, yDest)) {   //on test tous les mouvements possibles et imaginables
                         this.message = saved;
                         return true;
                     }
@@ -134,10 +138,10 @@ public class Echiquier implements BoardGames{
 
     @Override
     public boolean isEnd() {
-        if (!hasLegalMove()) {
-            if (isInCheck(jeuCourant, jeuAdverse)) {
+        if (!hasLegalMove()) {  //si il n' y a plus de move possible/légal
+            if (isInCheck(jeuCourant, jeuAdverse)) {    //si il y a échec
                 setMessage("ÉCHEC ET MAT ! " + jeuAdverse.getCouleur() + " gagne !");
-            } else {
+            } else {    //sinon match null (aucun coup légal des 2 cotés mais pas d'echec et MAT)
                 setMessage("PAT ! Match nul.");
             }
             return true;
