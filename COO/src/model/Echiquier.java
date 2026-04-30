@@ -56,9 +56,92 @@ public class Echiquier implements BoardGames{
         return list;
     }
 
+    // --- Helpers échec / mat / pat ---
+
+    private boolean isPathBlocked(int xSrc, int ySrc, int xDest, int yDest) {
+        int dx = Integer.signum(xDest - xSrc);
+        int dy = Integer.signum(yDest - ySrc);
+        int cx = xSrc + dx;
+        int cy = ySrc + dy;
+        while (cx != xDest || cy != yDest) {
+            if (jeuBlanc.findPiece(cx, cy) != null || jeuNoir.findPiece(cx, cy) != null) return true;
+            cx += dx;
+            cy += dy;
+        }
+        return false;
+    }
+
+    private boolean isSquareAttacked(int x, int y, Jeu attacker) {
+        for (Pieces p : attacker.getPieces()) {
+            if (p.getX() == -1) continue;
+            if (p instanceof Pion) {
+                if (((Pion) p).isCaptureMove(x, y)) return true;
+            } else if (p instanceof Cavalier) {
+                if (p.isMoveOk(x, y)) return true;
+            } else {
+                if (p.isMoveOk(x, y) && !isPathBlocked(p.getX(), p.getY(), x, y)) return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isInCheck(Jeu jeu, Jeu adversaire) {
+        Coord king = jeu.getKingCoord();
+        if (king == null) return false;
+        return isSquareAttacked(king.getX(), king.getY(), adversaire);
+    }
+
+    private boolean doesNotLeaveKingInCheck(int xSrc, int ySrc, int xDest, int yDest) {
+        Pieces moving = jeuCourant.findPiece(xSrc, ySrc);
+        Pieces captured = jeuAdverse.findPiece(xDest, yDest);
+        int capX = (captured != null) ? captured.getX() : 0;
+        int capY = (captured != null) ? captured.getY() : 0;
+
+        ((AbstractPiece) moving).x = xDest;
+        ((AbstractPiece) moving).y = yDest;
+        if (captured != null) {
+            ((AbstractPiece) captured).x = -1;
+            ((AbstractPiece) captured).y = -1;
+        }
+
+        boolean safe = !isInCheck(jeuCourant, jeuAdverse);
+
+        ((AbstractPiece) moving).x = xSrc;
+        ((AbstractPiece) moving).y = ySrc;
+        if (captured != null) {
+            ((AbstractPiece) captured).x = capX;
+            ((AbstractPiece) captured).y = capY;
+        }
+        return safe;
+    }
+
+    private boolean hasLegalMove() {
+        String saved = this.message;
+        for (Pieces p : jeuCourant.getPieces()) {
+            if (p.getX() == -1) continue;
+            for (int xDest = 0; xDest < 8; xDest++) {
+                for (int yDest = 0; yDest < 8; yDest++) {
+                    if (isMoveOk(p.getX(), p.getY(), xDest, yDest)) {
+                        this.message = saved;
+                        return true;
+                    }
+                }
+            }
+        }
+        this.message = saved;
+        return false;
+    }
+
     @Override
     public boolean isEnd() {
-        //@TODO
+        if (!hasLegalMove()) {
+            if (isInCheck(jeuCourant, jeuAdverse)) {
+                setMessage("ÉCHEC ET MAT ! " + jeuAdverse.getCouleur() + " gagne !");
+            } else {
+                setMessage("PAT ! Match nul.");
+            }
+            return true;
+        }
         return false;
     }
 
@@ -95,19 +178,9 @@ public class Echiquier implements BoardGames{
         }
 
         // 4. aucune pièce (alliée ou adverse) ne bloque le trajet intermédiaire
-        if (!(movedPiece instanceof Cavalier)) {
-            int dx = Integer.signum(xDest - xSrc); // signum(n) = -1 si n<0 , =0 si n==0, =1 si n>0
-            int dy = Integer.signum(yDest - ySrc);
-            int cx = xSrc + dx;
-            int cy = ySrc + dy;
-            while (cx != xDest || cy != yDest) {
-                if (jeuCourant.findPiece(cx, cy) != null || jeuAdverse.findPiece(cx, cy) != null) {
-                    setMessage("KO : pièce sur le chemin");
-                    return false;
-                }
-                cx += dx;
-                cy += dy;
-            }
+        if (!(movedPiece instanceof Cavalier) && isPathBlocked(xSrc, ySrc, xDest, yDest)) {
+            setMessage("KO : pièce sur le chemin");
+            return false;
         }
 
         // 5. destination pas occupée par une pièce alliée ?
@@ -121,6 +194,12 @@ public class Echiquier implements BoardGames{
             setMessage("OK : déplacement + capture");
         } else {
             setMessage("OK : déplacement simple");
+        }
+
+        // 7. le mouvement ne doit pas laisser le roi en échec
+        if (!doesNotLeaveKingInCheck(xSrc, ySrc, xDest, yDest)) {
+            setMessage("KO : mouvement illégal, votre roi serait en échec");
+            return false;
         }
         return true;
     }
@@ -148,6 +227,9 @@ public class Echiquier implements BoardGames{
         } else {
             jeuCourant = jeuBlanc;
             jeuAdverse = jeuNoir;
+        }
+        if (isInCheck(jeuCourant, jeuAdverse)) {
+            setMessage("ÉCHEC au roi " + jeuCourant.getCouleur() + " !");
         }
     }
 

@@ -20,16 +20,41 @@ The `JAVA PROJECTS` view allows you to manage your dependencies. More details ca
 ---
 
 
+# A LIRE !!!
+
+## Gestion de l'échec, du mat et du pat — FAIT (2026-04-30)
+
+### Nouvelles méthodes dans `Echiquier.java`
+
+| Méthode | Rôle |
+|---|---|
+| `isPathBlocked(xSrc,ySrc,xDest,yDest)` | Vérifie si une pièce quelconque bloque le trajet entre deux cases (extrait de `isMoveOk` pour éviter la duplication) |
+| `isSquareAttacked(x, y, attacker)` | Retourne `true` si une pièce de `attacker` peut atteindre la case (x,y) — gère le Pion (prise diagonale via `isCaptureMove`), le Cavalier (saut, pas de blocage), et toutes les autres pièces (mouvement + vérification du chemin) |
+| `isInCheck(jeu, adversaire)` | Retourne `true` si le roi de `jeu` est actuellement en échec |
+| `doesNotLeaveKingInCheck(xSrc,ySrc,xDest,yDest)` | Simule le coup (déplace la pièce, retire l'éventuelle pièce capturée), vérifie que le roi n'est pas en échec, puis **annule** la simulation — utilisé dans `isMoveOk` |
+| `hasLegalMove()` | Parcourt toutes les pièces du joueur courant et toutes les cases : retourne `true` dès qu'un coup légal existe |
+| `isEnd()` | Retourne `true` si le joueur courant n'a aucun coup légal — distingue **mat** (roi en échec → le joueur adverse gagne) et **pat** (roi non en échec → match nul) |
+
+### Modification de `Echiquier.isMoveOk()`
+
+Un **7ème check** a été ajouté à la fin : après toutes les validations existantes, le coup est refusé s'il laisserait le propre roi en échec (`doesNotLeaveKingInCheck`). Cela couvre notamment le cas où une pièce est clouée.
+
+### Modification de `Echiquier.switchJoueur()`
+
+Après le changement de tour, si le nouveau joueur courant est en échec, le message est mis à jour : `"ÉCHEC au roi <COULEUR> !"`.
+
+### Modification de `Jeu.java`
+
+Ajout de `getPieces()` qui retourne une vue non modifiable de la liste des pièces — nécessaire pour que `Echiquier` puisse itérer dessus dans `isSquareAttacked` et `hasLegalMove`.
+
+---
+
 # @TODO
 Ce qui est commencé mais incomplet (@TODO)
 
 | Fonctionnalité | État |
 |---|---|
-| `isEnd()` dans Echiquier | retourne false en dur |
 | `pawnPromotion()` dans Jeu | retire le pion mais ne crée pas la nouvelle pièce |
-| `capture()` dans AbstractPiece | FAIT — met x=-1, y=-1 |
-| `isCaptureMove()` dans Pion | FAIT — prise diagonale |
-| Obstacles sur le chemin | FAIT — dans `Echiquier.isMoveOk()` check 4 |
 | Roque (`setCastling()`) | squelette vide |
 | `undoMove()` / `undoCapture()` | commentés, pas commencés |
 

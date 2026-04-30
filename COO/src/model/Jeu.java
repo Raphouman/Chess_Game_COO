@@ -1,8 +1,10 @@
 package model;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import tools.ChessPiecesFactory;
+
 
 public class Jeu {    //pas abstract car instance de Jeu 
 // il y en a 2, il est défini par sa couleur et les pièces qui le composent
@@ -45,6 +47,9 @@ public class Jeu {    //pas abstract car instance de Jeu
         return null;    //obligatoire car on a spécifié que la fonction renvoyait un objet de type Coord
     }
 
+    public List<Pieces> getPieces() {
+        return Collections.unmodifiableList(pieces);
+    }
 
     //----------------------------------------------------
 
