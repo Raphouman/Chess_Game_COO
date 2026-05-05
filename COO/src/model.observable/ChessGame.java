@@ -57,19 +57,23 @@ public class ChessGame extends Observable implements BoardGames{
 	 * @return OK si deplacement OK
 	 * si OK, permet l'alternance des joueurs
 	 */
-	public boolean move (int xInit, int yInit, int xFinal, int yFinal){
-		boolean ret = false; 
+	public boolean move (int xInit, int yInit, int xFinal, int yFinal, String promotionType){
+		boolean ret = false;
 
 		ret = echiquier.isMoveOk(xInit, yInit, xFinal, yFinal);
 		if (ret){
-			ret = echiquier.move(xInit, yInit, xFinal, yFinal);
+			ret = echiquier.move(xInit, yInit, xFinal, yFinal, promotionType);
 		}
 		if (ret){
 			echiquier.switchJoueur();
-		}		
-		
+		}
+
 		this.notifyObservers(echiquier.getPiecesIHM());
-		return ret;	
+		return ret;
+	}
+
+	public boolean isPawnPromotionMove(int xInit, int yInit, int xFinal, int yFinal) {
+		return echiquier.isPawnPromotionMove(xInit, yInit, xFinal, yFinal);
 	}
 
 

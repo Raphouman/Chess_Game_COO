@@ -10,7 +10,9 @@ public interface ChessGameControlers {
 	 * @param finalCoord
 	 * @return true si le déplacement s'est bien passé
 	 */
-	public boolean move(Coord initCoord, Coord finalCoord);
+	public boolean move(Coord initCoord, Coord finalCoord, String promotionType);
+
+	public boolean isPawnPromotionMove(Coord initCoord, Coord finalCoord);
 
 	/**
 	 * @return message relatif aux déplacement, capture, etc.

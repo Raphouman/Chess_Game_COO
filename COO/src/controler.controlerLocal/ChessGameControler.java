@@ -1,6 +1,7 @@
 package controler.controlerLocal;
 
 import model.Coord;
+import model.Couleur;
 import model.observable.ChessGame;
 import controler.AbstractChessGameControler;
 
@@ -26,7 +27,7 @@ public class ChessGameControler extends AbstractChessGameControler {
 	 */
 	@Override
 	public boolean isPlayerOK(Coord initCoord) {
-		model.Couleur pieceCouleur = getPieceColor(initCoord);
+		Couleur pieceCouleur = getPieceColor(initCoord);
 		if (pieceCouleur == null) return false;
 		return pieceCouleur.equals(getColorCurrentPlayer());
 	}

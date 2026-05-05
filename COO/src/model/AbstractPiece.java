@@ -30,9 +30,9 @@ public abstract class AbstractPiece implements Pieces {
     protected abstract boolean isAlgoMoveOk(int xDest, int yDest);
 
     @Override
-    public final boolean isMoveOk(int xDest, int yDest){
-        if (Coord.coordonnees_valides(xDest, yDest)){
-            return isAlgoMoveOk(xDest,yDest);
+    public final boolean isMoveOk(int xDest, int yDest){ // TEMPLATE METHODE
+        if (Coord.coordonnees_valides(xDest, yDest)){  // comportement commun
+            return isAlgoMoveOk(xDest,yDest);  // comportement spécifique
         }
         return false;
     }

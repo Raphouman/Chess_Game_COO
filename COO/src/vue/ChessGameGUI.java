@@ -18,6 +18,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import model.Coord;
@@ -84,7 +85,7 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                JPanel square = this.newSquare(i, j);
+                JPanel square = this.newSquare(i, j); //
                 this.chessBoardGuiContainer.add(square);
                 this.mapSquareCoord.put(square, new Coord(j, i));
                 tab2DJPanel[j][i] = square;
@@ -97,7 +98,7 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
         }
     }
 
-    private JPanel newSquare(int i, int j) {
+    private JPanel newSquare(int i, int j) { // fonction qui pour chaque case du damier lui associe son component
         JPanel square = new JPanel(new BorderLayout());
         int row = i % 2;
         if (row == 0) {
@@ -137,7 +138,7 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
             for (Coord coord : piece.getList()) {   // une même PieceIHM peut avoir plusieurs positions (2 tours, ...)
                 JLabel label = new JLabel(
                         new ImageIcon(ChessImageProvider.getImageFile(type, couleur)));
-                tab2DJPanel[coord.x][coord.y].add(label);
+                tab2DJPanel[coord.x][coord.y].add(label); // on rajoute l'image de la pièce à la case
             }
         }
 
@@ -156,16 +157,16 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
         if (!(c instanceof JPanel)) return; // si souris hors des cases
 
         JPanel clickedSquare = (JPanel) c;
-        if (clickedSquare.getComponentCount() == 0) return; // si case vide (sans pièce), rien à saisir
+        if (clickedSquare.getComponentCount() == 0) return; // si case vide (sans image de pièce), rien à saisir
 
-        Component comp = clickedSquare.getComponent(0);
+        Component comp = clickedSquare.getComponent(0); // on récupère le label (image de la pièce)
         if (!(comp instanceof JLabel)) return;
 
         pieceToMoveSquare = clickedSquare;  // JPANEL = CASE
         pieceToMove = (JLabel) comp;        // JCOMPONENT (JLABEL) = PIECE
 
         // Décalage entre le coin haut-gauche de la case et la position de la souris
-        xAdjustment = clickedSquare.getX() - e.getX();
+        xAdjustment = clickedSquare.getX() - e.getX();  //utile pour le mouseDragged
         yAdjustment = clickedSquare.getY() - e.getY();
 
         // Retirer la pièce de sa case et la placer sur la DRAG_LAYER
@@ -181,6 +182,7 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
     }
 
     @Override
+    // de MouseMotionListener : appelé à chaque pixel de mouvement de la souris pendant un drag
     public void mouseDragged(MouseEvent e) {
         if (pieceToMove == null) return; // Si on drag sans avoir cliqué sur une pièce (case vide), on ignore.
         pieceToMove.setLocation(e.getX() + xAdjustment, e.getY() + yAdjustment); // Repositionne la pièce à chaque pixel de mouvement. L'xAdjustment maintient l'offset calculé au mousePressed pour un drag naturel.
@@ -193,12 +195,12 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
         // Retirer la pièce de la couche de glissement avant tout rafraîchissement, sinon update() dessine le plateau mais la pièce fantôme reste dessus.
         layeredPane.remove(pieceToMove);
 
-        Component c = chessBoardGuiContainer.getComponentAt(e.getX(), e.getY());
+        Component c = chessBoardGuiContainer.getComponentAt(e.getX(), e.getY()); //la case où on veut relacher la pièce
         Coord initCoord = mapSquareCoord.get(pieceToMoveSquare);
 
         // Déposé hors plateau : repositionner à l'origine
         if (!(c instanceof JPanel) || initCoord == null) {
-            pieceToMoveSquare.add(pieceToMove);
+            pieceToMoveSquare.add(pieceToMove); // on ajoute la pièce (image) à sa case d'origine
             pieceToMoveSquare.revalidate();
             layeredPane.repaint();
             pieceToMove = null;
@@ -206,15 +208,16 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
             return;                         // on appel pas update dans ce cas
         }
 
-        JPanel targetSquare = (JPanel) c;
-        Coord finalCoord = mapSquareCoord.get(targetSquare);
+
+        JPanel targetSquare = (JPanel) c; //sinon on recup la case visée
+        Coord finalCoord = mapSquareCoord.get(targetSquare); // et ses coords
 
         // Vérifier que c'est bien le tour de ce joueur
         // Si ce n'est pas le tour de ce joueur, le contrôleur ne va jamais appeler chessGame.move(), donc notifyObservers ne serait jamais déclenché — on gère manuellement la
         //  remise en place et le message.
         if (!chessGameControler.isPlayerOK(initCoord)) {
             System.out.println("KO : c'est au tour de l'autre joueur");
-            pieceToMoveSquare.add(pieceToMove);
+            pieceToMoveSquare.add(pieceToMove); // n ajoute la pièce (image) à sa case d'origine
             pieceToMoveSquare.revalidate();
             layeredPane.repaint();
             pieceToMove = null;
@@ -222,15 +225,28 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
             return;
         }
 
+        // Si promotion, demander le type à l'utilisateur avant d'exécuter le coup
+        String promotionType = null;
+        if (chessGameControler.isPawnPromotionMove(initCoord, finalCoord)) {
+            String[] options = {"Dame", "Tour", "Fou", "Cavalier"};
+            int choice = JOptionPane.showOptionDialog(this,
+                    "Choisissez la pièce de promotion :",
+                    "Promotion du pion",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                    null, options, options[0]);
+            promotionType = (choice >= 0) ? options[choice] : "Dame";
+        }
+
         // Tenter le déplacement — déclenche notifyObservers → update()
-        chessGameControler.move(initCoord, finalCoord); // declenche ChessGame.move() -> notifyObservers() -> ChessGameGUI.update()
-        System.out.println(chessGameControler.getMessage());    // chessGameController.getMessage() -> ... -> echiquier.getMessage()
+        chessGameControler.move(initCoord, finalCoord, promotionType);
+        System.out.println(chessGameControler.getMessage());
 
         pieceToMove = null;
         pieceToMoveSquare = null;
         layeredPane.repaint();  // redessine visuellement le layeredPane
     }
 
+    //Java impose qu'on implémente chaque méthode de l'interface
     @Override public void mouseClicked(MouseEvent e)  {}
     @Override public void mouseEntered(MouseEvent e)  {}
     @Override public void mouseExited(MouseEvent e)   {}

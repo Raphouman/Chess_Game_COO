@@ -19,7 +19,7 @@ public interface BoardGames {
 	 * @param yFinal
 	 * @return OK si deplacement OK	 
 	 */
-	public boolean move (int xInit, int yInit, int xFinal, int yFinal); 
+	public boolean move (int xInit, int yInit, int xFinal, int yFinal, String promotionType);
 
 	/**
 	 * @return true si c'est la fin du jeu

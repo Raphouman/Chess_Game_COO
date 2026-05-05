@@ -95,7 +95,7 @@ public class Echiquier implements BoardGames{
     private boolean doesNotLeaveKingInCheck(int xSrc, int ySrc, int xDest, int yDest) { // Quand le roi et en echec, est ce que le mouvement le laisse en echec ou le sauve ?
         Pieces moving = jeuCourant.findPiece(xSrc, ySrc);   //le jeu courant : où le roi est actuellement  en echec !
         Pieces captured = jeuAdverse.findPiece(xDest, yDest);
-        int capX = (captured != null) ? captured.getX() : 0;    //on récup les coords de la pièce à capturer
+        int capX = (captured != null) ? captured.getX() : 0;    //on récup les coords de la pièce à capturer (il peut ne pas y en avoir, que ca soit juste un déplacement "sucidaire")
         int capY = (captured != null) ? captured.getY() : 0;
 
         ((AbstractPiece) moving).x = xDest;         // on SIMULE et on déplace vraiment la pièce du jeu courant
@@ -137,6 +137,7 @@ public class Echiquier implements BoardGames{
     }
 
     @Override
+    //appelé dans le controller après chaque mouvement pour vérifier si la partie est terminée ou pas
     public boolean isEnd() {
         if (!hasLegalMove()) {  //si il n' y a plus de move possible/légal
             if (isInCheck(jeuCourant, jeuAdverse)) {    //si il y a échec
@@ -166,7 +167,7 @@ public class Echiquier implements BoardGames{
 
         // 3. mouvement valide pour la pièce (et dans le plateau) ?
         Pieces movedPiece = jeuCourant.findPiece(xSrc, ySrc);
-        boolean isNormalMove  = jeuCourant.isMoveOk(xSrc, ySrc, xDest, yDest);
+        boolean isNormalMove  = jeuCourant.isMoveOk(xSrc, ySrc, xDest, yDest); //appel celui de la pièce
         boolean isPawnCapture = (movedPiece instanceof Pion)
                 && ((Pion) movedPiece).isCaptureMove(xDest, yDest)
                 && jeuAdverse.findPiece(xDest, yDest) != null;
@@ -209,8 +210,16 @@ public class Echiquier implements BoardGames{
     }
 
 
+    public boolean isPawnPromotionMove(int xSrc, int ySrc, int xDest, int yDest) {
+        Pieces p = jeuCourant.findPiece(xSrc, ySrc);
+        if (!(p instanceof Pion)) return false;
+        if (p.getCouleur() == Couleur.BLANC && yDest == 0) return true;
+        if (p.getCouleur() == Couleur.NOIR  && yDest == 7) return true;
+        return false;
+    }
+
     @Override
-    public boolean move(int xSrc, int ySrc, int xDest, int yDest) {
+    public boolean move(int xSrc, int ySrc, int xDest, int yDest, String promotionType) {
         if (!isMoveOk(xSrc, ySrc, xDest, yDest)) {
             return false;
         }
@@ -221,6 +230,12 @@ public class Echiquier implements BoardGames{
         }
 
         boolean moved = jeuCourant.move(xSrc, ySrc, xDest, yDest);
+
+        if (moved && jeuCourant.isPawnPromotion(xDest, yDest)) {
+            String type = (promotionType != null) ? promotionType : "Dame";
+            jeuCourant.pawnPromotion(xDest, yDest, type);
+        }
+
         return moved;
     }
 
@@ -234,6 +249,10 @@ public class Echiquier implements BoardGames{
         }
         if (isInCheck(jeuCourant, jeuAdverse)) {
             setMessage("ÉCHEC au roi " + jeuCourant.getCouleur() + " !");
+        }
+        if (isEnd()) { // par ordre de priorité sur isInChek
+            getMessage(); // pour mettre à jour le message de fin de partie
+            // break ???
         }
     }
 

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import tools.ChessPiecesFactory;
+import tools.ChessSinglePieceFactory;
 
 
 public class Jeu {    //pas abstract car instance de Jeu 
@@ -111,20 +112,17 @@ public class Jeu {    //pas abstract car instance de Jeu
         return false;
     }
 
+    // utilisation dans Echiquier.move
     public boolean pawnPromotion(int xFinal, int yFinal, String newPieceType){
-        if (isPawnPromotion(xFinal, yFinal)){
-            for (Pieces p : pieces){
-                if (p instanceof Pion){
-                    if ((p.getX() == xFinal) && (p.getY() == yFinal)){
+        if (!isPawnPromotion(xFinal, yFinal)) return false;
 
-                        pieces.remove(p);   //on retire le pion promu de la liste des pièces du jeu pour le remplacer par la nouvelle pièce choisie par le joueur
-                        // A FAIRE  : créer une nouvelle pièce du type choisi par le joueur (ex : Dame) avec les mêmes coordonnées que le pion promu et l'ajouter à la liste des pièces du jeu
-                        // Pieces newPiece = ChessSinglePieceFactory.createPiece(newPieceType, p.getCouleur(), new Coord(x, y));
-                    }
-                }
-            }
-        }
-        return false;
+        Pieces pion = findPiece(xFinal, yFinal);
+        if (pion == null) return false;
+
+        pieces.remove(pion);
+        Pieces newPiece = ChessSinglePieceFactory.newPiece(pion.getCouleur(), newPieceType, xFinal, yFinal);
+        pieces.add(newPiece);
+        return true;
     }
 
     // -------------------------------------------------------------------------

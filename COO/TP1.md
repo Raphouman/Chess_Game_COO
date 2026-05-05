@@ -1,23 +1,32 @@
 On code sur l'IDE IntelliJ IDEA
 # COO - 1er cours-TP
+Un objet a des **attributs** (caractéristiques) et des **comportements** (fonctions/méthodes/services).
 ## PILIER
 - **Polymorphisme** (=plusieurs formes) : Une même méthode peut se comporter différemment selon l’objet (ex : ecrire() n’est pas pareil pour un stylo et un clavier).
+Polymorphisme d'héritage = **@Override** (classe Object ou Interface) + **surcharge d'argument** (constructeur) + **introspection** (ex : List<Piece> pieces = new ArrayList<>(); ou LinkedList<>();) + **ad-hoc** (ex : ecrire() dans Stylo et ecrire() dans Clavier, qui n'ont rien à voir)
+
 - **Héritage** (Une classe peut hériter d’une autre (ex : Bic hérite de Stylo).) On doit pouvoir dire « L’héritier est un hériteur ». Par ex : « Le canard est un animal »
-- **Abstraction**= INTERFACE (du + au – abstrait : interface classe abstraite  classe)
-- **Encapsulation** = (On ne montre que l’essentiel (ex : tu appuies sur un bouton sans savoir ce qu’il fait à l’intérieur).)  SERVICE + METHODE (comportements = fonctions)
+Attention : On évite de faire TROP d'héritage, on peut passer par un médiateur (ex : interface) pour faire le lien entre les classes.
+
+- **Abstraction**= INTERFACE (du + au – abstrait : interface ==> classe abstraite ==> classe concrète)
+- **Encapsulation** = (On ne montre que l’essentiel (ex : tu appuies sur un bouton sans savoir ce qu’il fait à l’intérieur).) ==> SERVICE + METHODE (comportements = fonctions). 
+On cache l’intérieur (les données) et on passe par des “portes” (les méthodes).
+
+!!! **délégation** = On utilise les méthodes d'un de ses attributs et rien d'autre pour implémenter un de ses comportements (ex : la classe Echiquier utilise les méthodes de la classe Piece pour implémenter le comportement de déplacement des pièces, sans connaitre les détails de chaque pièce).
 
 ## SOLID (= PRINCIPES)
 **Les principes sont des applications des pilliers**
 
 - **Single Responsability Principle** (utiliser la Delegation) chacun ses missions, ne doit avoir qu'une seule raison de changer. Une classe est responsable de ses attributs ! ==> Pas de classe DIEU.
 - **Open/Closed Principle** (ouvert à l’extension et fermé à la modif ==>  (interface) 
-- **Liskov Subsitution Principle** (2 types différents) 
-`Animal a = new Chat()`
+- **Liskov Subsitution Principle** : Une abstraction A doit pouvoir être substituée par n'importe laquelle de ses sous-abstractions sans que cela n'affecte le programme 
+`Animal a = new Chat()` : type **Abstrait** (Animal) + type **concret** (Chat)
 une méthode utilisant une référence vers une classe de base doit pouvoir référencer des objets de ses classes dérivées sans les connaitre (polymorphisme).
+
 - **Interface Segregation Principle** (lié à SRP, méthode1 dans une interfaceA ssi toutes les classes implémentant cette interfaceA ont besoin de cette méthode 1 = aucun client ne devrait dépendre de méthodes qu'il n'utilise pas)
 - **Dependency Inversion Principle** (O/C + Liskov = Les modules de haut niveau ne doivent pas dépendre des modules de bas niveau. Les deux doivent dépendre des abstractions. 2) Les abstractions ne doivent pas dépendre des détails. Les détails doivent dépendre des abstractions)
-    - Ex : Classe animal ne doit pas implémenter des méthodes spécifiques à une abeille
-    - Ex : Si la classe monde dépend de 3000 "Animal" ==> on va devoir faire 3000 tests de type (if instance of...)
+    - Ex : Classe Jeu ne doit pas implémenter des méthodes spécifiques à un cheval
+    - Ex : Si la classe Echiquier dépend de 3000 "Pièce" ==> on va devoir faire 3000 tests de type (if instance of...)
 
 
 ---
@@ -30,34 +39,48 @@ une méthode utilisant une référence vers une classe de base doit pouvoir réf
     - **Ouvert à l'extension** : Ajouter de nouvelles fonctionnalités FACILEMENT = sans modifier le code existant (ex : ajouter une nouvelle classe qui implémente une interface déjà utilisée)
     - **Fermé à la modification** : Ne pas modifier le code existant (ex : ne pas ajouter de nouveaux if dans une classe déjà utilisée)
 - **Liskov** : Je dois pouvoir substituer n'importe quel sous type, d'un surtype. Polymorphisme (ecire()) et Héritage (Bic hérite de Stylo) sont les moyens d'implémenter le Liskov Substitution Principle.
-- **Interface Segregation** : On doit éviter les interfaces "Dieu" (ex : interface "Animal" avec 100 méthodes, alors que la classe "Chat" n'en utilise que 10).
+- **Interface Segregation** : On doit éviter les interfaces "Dieu" (ex : interface "Piece" avec 100 méthodes, alors que la classe "Fou" n'en utilise que 10).
 - **Dependency Inversion** : Si on raisonne à haut niveau d'abstraction, on ne se soucie pas des détails concrets d'implémentation. 
-Ex : Template Method (ex : classe "Monde" qui utilise une interface "Animal", sans se soucier de la classe concrète "Chat" ou "Abeille" qui implémente cette interface).
+Ex : La classe monde, l'arbitre (Echiquier) dépend d'une interface (BoardGame) et pas d'implémentation concrète (Pièce...)
 
 
-
+BONUS :
 - **LoD** : Principe de la Moindre Connaissance (ou loi de Demeter) 
     Only speak to your closest friends (Echéquier parle au Jeu qui parle au Pièces)
 
 ---
 ---
+# COO - 3ème cours-TP (rappel 4A POO)
+## RAPPEL COLLECTION
+- **Collection** : structure de données qui permet de stocker et de manipuler des groupes d'objets (ex : List, Set, Map, etc.)
+- **List** : collection **ordonnée** qui peut contenir des éléments en double (ex :ArrayList, LinkedList, etc.)
+- **Set** : collection qui ne peut pas contenir d'éléments en double (ex : HashSet, TreeSet, etc.), **non ordonnée**
+- **Map** : collection qui associe des **clés à des valeurs** (ex : HashMap, TreeMap, etc.)
+## Comparateur vs Comparable
+- **Comparable** : interface qui permet de définir un ordre naturel pour les objets d'une classe (ex : `compareTo()` pour trier une liste d'objets de cette classe).
+- **Comparator** : interface qui permet de définir un ordre personnalisé pour les objets d'une classe (ex : `compare()` pour trier une liste d'objets de cette classe selon un critère spécifique).
+## EQUALS vs HASHCODE (equals ==> même hashcode, hashcode ==> pas forcément même equals)
+- **equals()** : méthode qui permet de comparer deux objets pour vérifier s'ils sont égaux (ex : `equals()` pour comparer le contenu de deux objets).
+- **hashCode()** : méthode qui permet de générer un code de hachage pour un objet (ex : `hashCode()` pour stocker des objets dans une collection de type HashSet ou HashMap).
 
+---
+---
 # COO - 4ème cours-TP
-## DESIGN PATTERNS (= Mise en oeuvre des principes SOLID)
-- **Design Pattern** : Solution réutilisable à un problème de conception récurrent (ex : Template Method, Strategy, Observer, etc.)
+## DESIGN PATTERNS (= Mise en oeuvre des principes SOLID) !!!
+- **Design Pattern** : Solution réutilisable à un problème de conception récurrent (ex : Template Method, médiateur, Fabrique, Strategy, Observer, etc.)
 
 
 ### TEMPLATE METHOD (un design patterns) ==> SOLID
 - **Template Method** : Permet de factoriser du code commun dans une méthode (finale) et de déléguer les parties spécifiques à des méthodes abstraites qui seront implémentées dans les sous classes.
 
-    - Dependency Inversion Principle : La méthode isMoveOk() dépend d'une abstraction (isAlgoMoveOk()) et pas d'une implémentation concrète (ex : isAlgoMoveOk() est implémenter dans les sous classes).
+    - Dependency Inversion Principle : La méthode isMoveOk() (AbstractPiece.java) dépend d'une abstraction (isAlgoMoveOk()) et pas d'une implémentation concrète (ex : isAlgoMoveOk() est implémenter dans les sous classes).
       ==> A haut niveau d'abstraction, on ne se soucie pas des détails concrets d'implémentation.
   
     Sinon, on respecte aussi le SRP (chacun sa mission) et le Open/Closed Principle (on peut ajouter de nouvelles pièces sans modifier le code existant).
 
 ### TEMPLATE METHOD, exemple dans le projet
 
-public isMoveOk() ==> une partie COMMUNE + une partie SPECIFIQUE
+public isMoveOk() (AbstractPiece.java) ==> une partie COMMUNE + une partie SPECIFIQUE
 - On code la partie COMMUNE (verif taille echéquier) dans isMoveOk()
 - Puis on on définit une méthode **abstraite protected** isAlgoMoveOk() 
 qui sera implémenter de manière **spécifique** dans chaque sous classe
@@ -65,6 +88,14 @@ qui sera implémenter de manière **spécifique** dans chaque sous classe
 Et donc isMoveOk : CODE COMMUN + isAlgoMoveOk()
 
 ATTENTION : On met **FINAL** la méthode isMoveOk() pour éviter que les sous classes puissent la modifier (et ainsi respecter le O/C).
+#### Inconvénient LSP du Template Method
+Si une sous-classe override un step avec un corps vide (**Hooks** : méthode avec corps vide) pour "désactiver" un comportement par défaut, elle viole LSP. 
+Ton prof cite exactement ce problème dans le DS 2022 avec deleteObservers() vide.
+
+
+
+#### Factory Method
+Factory Method est une spécialisation de Template Method. Une Factory Method peut aussi servir de step dans un grand Template Method
 
 ---
 
@@ -76,12 +107,13 @@ ATTENTION : On met **FINAL** la méthode isMoveOk() pour éviter que les sous cl
 ### O/C
 - Pas respecté : Enum ChessPiecePos et taille plateau dans Coord.java (coordonnees_valides()) ==> mettre des constantes dans un fichier config.java...
   Respecté : 
-- On peut ajouter de nouvelles pièces (ex : Cavalier) sans modifier le code existant grâce à l'**INTROSPECTION**
+- On peut ajouter de nouvelles pièces (ex : Cavalier) sans modifier le code existant grâce à l'**INTROSPECTION** (cf polymorphisme d'introspection)
 
 ### Liskov
 - Chaque pièce (ex : Roi, Reine, etc.) est une sous classe de la classe abstraite Piece, et peut être substituée à une référence de type Piece sans problème (ex : Piece p = new Roi();)
     ==>Chaque pièce implémente la méthode isAlgoMoveOk() de manière spécifique, mais on peut toujours appeler isMoveOk() sur une référence de type Piece sans se soucier de la classe concrète (ex : Piece p = new Roi(); p.isMoveOk(...);)
 - Liste de pièces : List<Piece> pieces = new ArrayList<>() ou LinkedList<>() 
+- Mauvais exemple : toString() qui retourne "ok" au lieu d'une description de la pièce, ou qui retourne une description différente selon la classe (ex : "Roi" pour la classe Roi, "Reine" pour la classe Reine, etc.) ==> on peut faire mieux en utilisant une méthode getDescription() dans la classe Piece qui sera implémentée de manière spécifique dans chaque sous classe.
 
 ### Interface Segregation
 - Pas d'interface "Dieu" avec 100 méthodes, chaque classe implémente uniquement les méthodes dont elle a besoin
@@ -109,44 +141,6 @@ getSource() : permet de récupérer la source de l'événement (ex : le bouton q
 
 - **Observer** : Un **design pattern** qui permet à un **objet (le listener)** de s'abonner à un autre objet/sujet (le **component**) pour recevoir des notifications lorsque le **component** change d'état (ex : Observer pour les changements de position des pièces sur l'échiquier)
 Ex de méthode pour **observer** : `update(Params)` qui est appelée par le sujet pour notifier les observers des changements d'état.
-
-### Dans le projet
-JFrame (ChessGameGUIProf)                    <-- container racine (fenêtre principale)
-└── JLayeredPane (layeredPane)               <-- container à couches = layers (`setContentPane(layeredPane)`)
-├── DEFAULT_LAYER:                           <-- par défaut pour les components normaux
-│   └── JPanel (chessBoardGuiContainer)      <-- container plateau d'echec de 64 cases
-│       └── GridLayout(8,8)
-│           ├── JPanel square[0][0]          <-- component case = 1 case du damier (case de la pièce JLabel)
-│           │   └── JLabel (pièce, optionnel)           <-- Image de la pièce sur la case (ex : TourBlancS.png) ou la Pièce en elle même (ex : TourBlanche)
-│           └── ... 63 autres cases ...
-└── DRAG_LAYER:                              <-- pour la pièce en cours de déplacement (JLabel de la pièce ajoutée tempo dans layeredPane en DRAG_LAYER pendant le drag)
-└── JLabel pieceToMove (temporaire pendant drag)
-
-### Lecture rapide (structure + comportement)
-
-- **`JFrame`** : fenêtre principale (*container racine*).
-- **`JLayeredPane`** : superpose les components (plateau + pièce déplacée au-dessus).
-- **`JPanel chessBoardGuiContainer`** : contient les 64 cases du damier.
-- **`JPanel square`** : représente une case (couleur + éventuel `JLabel`).
-- **`JLabel`** : affiche l'image d'une pièce.
-- **``DRAG_LAYER``** : couche temporaire pour la pièce en cours de déplacement. Permet de faire "flotter" la pièce au-dessus du plateau pendant le drag.
-
-### Layouts
-
-- **`GridLayout(8,8)`** sur `chessBoardGuiContainer` : organise les 64 cases en grille.
-- **`BorderLayout`** sur chaque `JPanel square` : place proprement le `JLabel` (image) dans la case.
-
-### Events / Listeners
-- **`MouseEvent`** : généré lors du clic et du déplacement de la souris. ==> `getX()`, `getY()`, `getSource()`, etc. pour récupérer les coordonnées et la source de l'événement.
-- **`MouseListener`**
-  - `mousePressed` : sélectionne la pièce (`JLabel`) et la passe en `DRAG_LAYER`.
-  - `mouseReleased` : calcule la case de départ/arrivée puis appelle `move(...)`.
-- **`MouseMotionListener`**
-  - `mouseDragged` : déplace visuellement le `JLabel` avec la souris (`MouseEvent`).
-- **`Observer.update(...)`**
-  - rafraîchit l'affichage après validation du déplacement par le modèle.
-
-<u>A retenir :</u> la vue gère l'affichage et les événements, le modèle valide les règles, puis notifie la vue.
 
 ---
 
@@ -229,3 +223,32 @@ Revoir template methode (ex : isMoveOk() + isAlgoMoveOk())
 ## Polymorphisme paramétrique
 - **Classe paramétrée** : classe qui peut être utilisée avec différents types de données (ex : List<T> en Java).
 - **Généricité** : capacité d'une classe ou d'une méthode à fonctionner avec différents types de données sans modification du code (ex : List<T> peut être utilisée pour List<String>, List<Integer>, etc.).
+
+
+---
+---
+
+# PARTIEL 2024/2025 - 1S
+## QUESTIONS DE COURS (sur le projet)
+- Expliquer le rôle de chaque composant dans l'architecture MVC du projet (Model, View, Controller) et comment ils interagissent entre eux.
+- Comment le design pattern Observer est utilisé dans le projet pour permettre la communication entre le modèle et la vue ? Donner un exemple concret de notification d'un changement d'état du modèle à la vue.
+- Comment les principes SOLID sont respectés dans l'architecture du projet ? Donner des exemples spécifiques pour chaque principe (SRP, O/C, Liskov, Interface Segregation, Dependency Inversion).
+## EXERCICES
+- ...
+
+## CONCEPTION
+- Architceture MVC + Observer/Observable. (Revoir le sens des fleches, pleines [héritage] vs pointillées [dépendance], et les rôles de chaque composant)
+- 3 Vues donc une Interface Vue et des AbstractVue...
+- Plusieurs modèles donc IModel et des AbstractModel...
+
+- Est ce une bonne idée de faire hériter la classe IModel de IObservable (`notify()`, `addobserver()`, `removeobserver()`) et la classe IView de IObserver ? 
+    - Pas tant car ca voudrait dire que chaque model est observable et que chaque view est un observer, ce qui n'est pas forcément le cas, mais ca peut l'être.
+      - Ex dans le projet : L'interface IModel n'implémente pas IObservable directement, mais le modèle **ChessGame** implémente IObservable, et la vue ChessGameGUI implémente IObserver, mais on pourrait imaginer d'autres modèles ou vues qui n'ont pas besoin de ces comportements.
+==> Attention à ce que ça respecte la **Interface Segregation Principle** : on ne veut pas forcer toutes les classes à implémenter des méthodes dont elles n'ont pas besoin.
+    - Possibilité : Pas d'héritage entre IModel et IObservable, mais plutôt une composition : la classe ChessGame implémente IModel et contient une instance de IObservable pour gérer les observers, et la classe ChessGameGUI implémente IObserver et s'abonne à l'instance de IObservable du modèle.
+
+### NOTIFICATIONS (template méthode)
+- IJoueur (dans Model) a une méthode `prévenir()` et `notifyObservers()` pour notifier les vues des changements d'état du modèle (ex : changement de tour, échec, mat, etc.)
+- INotifJoeur à une méthode `prévenir()` pour envoyer des notifications spécifiques aux joueurs (ex : "C'est au tour du joueur X", "Échec au roi Y", etc.)
+    - AbstractNotif implémente INotifJoueur et contient une référence à IModel pour pouvoir accéder aux informations du modèle et envoyer des notifications pertinentes aux joueurs. A une méthode finale `prévenir()` qui appelle une méthode abstraite `prévenirSpecifique()` que les sous classes doivent implémenter pour envoyer des notifications spécifiques (ex : par SMS, par email, etc.)
+    - SMSNotif et EmailNotif sont des classes concrètes qui extends AbstractNotif et implémentent la méthode `prévenirSpecifique()` pour envoyer des notifications par SMS ou par email, en utilisant les informations du modèle (ex : nom du joueur, état de la partie, etc.) pour personnaliser les messages.
