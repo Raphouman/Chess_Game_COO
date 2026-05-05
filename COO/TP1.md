@@ -3,50 +3,51 @@ On code sur l'IDE IntelliJ IDEA
 Un objet a des **attributs** (caractéristiques) et des **comportements** (fonctions/méthodes/services).
 ## PILIER
 - **Polymorphisme** (=plusieurs formes) : Une même méthode peut se comporter différemment selon l’objet (ex : ecrire() n’est pas pareil pour un stylo et un clavier).
-Polymorphisme d'héritage = **@Override** (classe Object ou Interface) + **surcharge d'argument** (constructeur) + **introspection** (ex : List<Piece> pieces = new ArrayList<>(); ou LinkedList<>();) + **ad-hoc** (ex : ecrire() dans Stylo et ecrire() dans Clavier, qui n'ont rien à voir)
+    Polymorphisme d'**héritage** = **@Override** (classe Object ou Interface) + **surcharge d'argument** (constructeur) <==> **introspection** (ex : List<Piece> pieces = new ArrayList<>(); ou LinkedList<>();) 
+  <==> **List<T>** = polymorphisme **paramétrique** → on ne se soucie pas du type concret au moment de coder la liste + **ad-hoc** (ex : ecrire() dans Stylo et ecrire() dans Clavier, qui n'ont rien à voir)
+  ### Polymorphisme paramétrique
+     - **Classe paramétrée** : classe qui peut être utilisée avec différents types de données (ex : List<T> en Java).
+     - **Généricité** : capacité d'une classe ou d'une méthode à fonctionner avec différents types de données sans modification du code (ex : List<T> peut être utilisée pour List<String>, List<Integer>, etc.).
+
 
 - **Héritage** (Une classe peut hériter d’une autre (ex : Bic hérite de Stylo).) On doit pouvoir dire « L’héritier est un hériteur ». Par ex : « Le canard est un animal »
 Attention : On évite de faire TROP d'héritage, on peut passer par un médiateur (ex : interface) pour faire le lien entre les classes.
+==> cf **Design Patterns** : Mediator, Template Method ...
 
-- **Abstraction**= INTERFACE (du + au – abstrait : interface ==> classe abstraite ==> classe concrète)
+- **Abstraction**= INTERFACE (du + au – abstrait : interface ==> classe abstraite ==> classe concrète). Pas de détail d'implémentation, pas de langage de programmation spécifique.
+
 - **Encapsulation** = (On ne montre que l’essentiel (ex : tu appuies sur un bouton sans savoir ce qu’il fait à l’intérieur).) ==> SERVICE + METHODE (comportements = fonctions). 
-On cache l’intérieur (les données) et on passe par des “portes” (les méthodes).
+On cache l’intérieur (les données/ **attributs**) et on passe par des “portes” (les méthodes). Il y a aussi un aspect de protection (ex : les attributs sont **privés** et on utilise des getters/setters pour y accéder) pour éviter que les données soient modifiées de manière non contrôlée.
 
-!!! **délégation** = On utilise les méthodes d'un de ses attributs et rien d'autre pour implémenter un de ses comportements (ex : la classe Echiquier utilise les méthodes de la classe Piece pour implémenter le comportement de déplacement des pièces, sans connaitre les détails de chaque pièce).
+!!! **délégation = SRP** = On utilise les méthodes d'un de ses attributs et rien d'autre pour implémenter un de ses comportements (ex : la classe Echiquier utilise les méthodes de la classe Piece pour implémenter le comportement de déplacement des pièces, sans connaitre les détails de chaque pièce).
+
 
 ## SOLID (= PRINCIPES)
 **Les principes sont des applications des pilliers**
 
-- **Single Responsability Principle** (utiliser la Delegation) chacun ses missions, ne doit avoir qu'une seule raison de changer. Une classe est responsable de ses attributs ! ==> Pas de classe DIEU.
-- **Open/Closed Principle** (ouvert à l’extension et fermé à la modif ==>  (interface) 
-- **Liskov Subsitution Principle** : Une abstraction A doit pouvoir être substituée par n'importe laquelle de ses sous-abstractions sans que cela n'affecte le programme 
-`Animal a = new Chat()` : type **Abstrait** (Animal) + type **concret** (Chat)
-une méthode utilisant une référence vers une classe de base doit pouvoir référencer des objets de ses classes dérivées sans les connaitre (polymorphisme).
+- **Single Responsability Principle** (utiliser la Delegation) chacun ses missions, ne doit avoir qu'une seule raison de changer. Une classe est responsable de ses attributs (leur **ENCAPSULATION**) ! ==> Pas de classe DIEU.
 
-- **Interface Segregation Principle** (lié à SRP, méthode1 dans une interfaceA ssi toutes les classes implémentant cette interfaceA ont besoin de cette méthode 1 = aucun client ne devrait dépendre de méthodes qu'il n'utilise pas)
-- **Dependency Inversion Principle** (O/C + Liskov = Les modules de haut niveau ne doivent pas dépendre des modules de bas niveau. Les deux doivent dépendre des abstractions. 2) Les abstractions ne doivent pas dépendre des détails. Les détails doivent dépendre des abstractions)
-    - Ex : Classe Jeu ne doit pas implémenter des méthodes spécifiques à un cheval
-    - Ex : Si la classe Echiquier dépend de 3000 "Pièce" ==> on va devoir faire 3000 tests de type (if instance of...)
-
-
----
----
-
-# COO - 2ème cours-TP
-## SOLID (détails additionnels)
-- **SRP** : Role d'une classe : constructeur qui donne des objets opérationnels (init des attributs...) + GERER l'encapsulation de ses attributs  
-- **O/C** :
+- **Open/Closed Principle** ==> (interface Observer/Observable) : `((Observable) chessGame).addObserver((Observer) frame)`
     - **Ouvert à l'extension** : Ajouter de nouvelles fonctionnalités FACILEMENT = sans modifier le code existant (ex : ajouter une nouvelle classe qui implémente une interface déjà utilisée)
     - **Fermé à la modification** : Ne pas modifier le code existant (ex : ne pas ajouter de nouveaux if dans une classe déjà utilisée)
-- **Liskov** : Je dois pouvoir substituer n'importe quel sous type, d'un surtype. Polymorphisme (ecire()) et Héritage (Bic hérite de Stylo) sont les moyens d'implémenter le Liskov Substitution Principle.
-- **Interface Segregation** : On doit éviter les interfaces "Dieu" (ex : interface "Piece" avec 100 méthodes, alors que la classe "Fou" n'en utilise que 10).
-- **Dependency Inversion** : Si on raisonne à haut niveau d'abstraction, on ne se soucie pas des détails concrets d'implémentation. 
-Ex : La classe monde, l'arbitre (Echiquier) dépend d'une interface (BoardGame) et pas d'implémentation concrète (Pièce...)
+  
+- **Liskov Subsitution Principle** : Un type/ Une abstraction A doit pouvoir être substituée par n'importe laquelle de ses sous-type /sous-abstractions sans que cela n'affecte le programme 
+`Animal a = new Chat()` : type **Abstrait / Déclaré** (Animal) + type **concret / instancié** (Chat)
+une méthode utilisant une référence vers une classe de base doit pouvoir référencer des objets de ses classes dérivées sans les connaitre (polymorphisme).
 
+- **Interface Segregation Principle** : "Forte cohésion, **faible couplage**"
+(lié à SRP, méthode1 dans une interfaceA ssi toutes les classes implémentant cette interfaceA ont besoin de cette méthode 1 = **aucun client ne devrait dépendre de méthodes qu'il n'utilise pas**)
+  On doit éviter les interfaces "Dieu" (ex : interface "Piece" avec 100 méthodes, alors que la classe "Fou" n'en utilise que 10).
 
-BONUS :
-- **LoD** : Principe de la Moindre Connaissance (ou loi de Demeter) 
-    Only speak to your closest friends (Echéquier parle au Jeu qui parle au Pièces)
+- **Dependency Inversion Principle** (O/C + Liskov = Les modules de haut niveau ne doivent pas dépendre des modules de bas niveau. Les deux doivent dépendre des abstractions. 2) Les abstractions ne doivent pas dépendre des détails. (Les détails doivent dépendre des abstractions))
+  **Ne nous appelez pas, c'est nous qui vous rappellerons** : (Le modèle [haut niveau d'abstraction] ne doit pas dépendre de la vue [bas niveau d'implémentation], il la notifie via l'interface **Observer**. 
+    - Ex : La classe monde, l'arbitre (Echiquier) dépend d'une interface (BoardGame) et pas d'implémentation concrète (Pièce...)
+    - Ex : Si la classe Echiquier dépend de 3000 "Pièces" différentes ==> on va devoir faire 3000 tests de type (if instance of...)
+
+(BONUS)
+- **LoD** : Principe de la Moindre Connaissance (ou loi de Demeter)
+  Only speak to your closest friends (Echéquier parle au Jeu qui parle au Pièces)
+Ex :  `a.getB().getC().doSomething()` (connaissance excessive).
 
 ---
 ---
@@ -72,27 +73,23 @@ BONUS :
 
 ### TEMPLATE METHOD (un design patterns) ==> SOLID
 - **Template Method** : Permet de factoriser du code commun dans une méthode (finale) et de déléguer les parties spécifiques à des méthodes abstraites qui seront implémentées dans les sous classes.
-
-    - Dependency Inversion Principle : La méthode isMoveOk() (AbstractPiece.java) dépend d'une abstraction (isAlgoMoveOk()) et pas d'une implémentation concrète (ex : isAlgoMoveOk() est implémenter dans les sous classes).
+    
+    - **Dependency Inversion Principle** : La méthode isMoveOk() (AbstractPiece.java) dépend d'une abstraction (isAlgoMoveOk()) et pas d'une implémentation concrète (ex : isAlgoMoveOk() est implémenter dans les sous classes).
       ==> A haut niveau d'abstraction, on ne se soucie pas des détails concrets d'implémentation.
-  
-    Sinon, on respecte aussi le SRP (chacun sa mission) et le Open/Closed Principle (on peut ajouter de nouvelles pièces sans modifier le code existant).
+    - Sinon, on respecte aussi le **SRP** (chacun sa mission) et le **Open/Closed** Principle (on peut ajouter de nouvelles pièces sans modifier le code existant).
 
 ### TEMPLATE METHOD, exemple dans le projet
 
-public isMoveOk() (AbstractPiece.java) ==> une partie COMMUNE + une partie SPECIFIQUE
-- On code la partie COMMUNE (verif taille echéquier) dans isMoveOk()
-- Puis on on définit une méthode **abstraite protected** isAlgoMoveOk() 
-qui sera implémenter de manière **spécifique** dans chaque sous classe
+`public isMoveOk()` (AbstractPiece.java) ==> une partie COMMUNE + une partie SPECIFIQUE
+- On code la partie COMMUNE (verif taille echéquier) dans `isMoveOk()`
+- Puis on on définit une méthode **abstraite protected** `isAlgoMoveOk() ` qui sera implémenter de manière **spécifique** dans chaque sous classe
 
-Et donc isMoveOk : CODE COMMUN + isAlgoMoveOk()
-
+Et donc **isMoveOk : CODE COMMUN + isAlgoMoveOk()**
 ATTENTION : On met **FINAL** la méthode isMoveOk() pour éviter que les sous classes puissent la modifier (et ainsi respecter le O/C).
+
 #### Inconvénient LSP du Template Method
 Si une sous-classe override un step avec un corps vide (**Hooks** : méthode avec corps vide) pour "désactiver" un comportement par défaut, elle viole LSP. 
 Ton prof cite exactement ce problème dans le DS 2022 avec deleteObservers() vide.
-
-
 
 #### Factory Method
 Factory Method est une spécialisation de Template Method. Une Factory Method peut aussi servir de step dans un grand Template Method
@@ -101,28 +98,43 @@ Factory Method est une spécialisation de Template Method. Une Factory Method pe
 
 ## Comment les principes SOLID sont mis en oeuvre dans le projet :
 ### SRP
-- Echiquier ==> Jeu ==> Pièce
-- Chaque pièce est responsable de son mode de déplacement spécifique (et ne connait pas l'échiquier)
+- **Respecté** : Echiquier ==> Jeu ==> Pièce
+Chaque pièce est responsable de son mode de déplacement spécifique (que l'échéquier ne connait pas, et les pièces ne connaissent pas l'échéquier) 
+- **Mauvais exemple** (spéculation) : la classe Echiquier qui gère à la fois l'UI, la logique de déplacement des pièces et la logique de vérification des règles du jeu (ex : échec, mat, etc.) ==> on peut déléguer la logique de déplacement à Jeu, l'UI à la Vue...
 
 ### O/C
-- Pas respecté : Enum ChessPiecePos et taille plateau dans Coord.java (coordonnees_valides()) ==> mettre des constantes dans un fichier config.java...
-  Respecté : 
-- On peut ajouter de nouvelles pièces (ex : Cavalier) sans modifier le code existant grâce à l'**INTROSPECTION** (cf polymorphisme d'introspection)
+- **Mauvais exemple** : Enum ChessPiecePos et taille plateau dans Coord.java (coordonnees_valides()) ==> mettre des constantes dans un fichier config.java... + if (p instance of Cavalier) dans Echiquier.isSquareAttacked() ==> on peut déléguer la responsabilité de vérifier si une pièce attaque une case à la pièce elle même (ex : p.isAttackingSquare(...)) pour éviter de devoir faire des if pour chaque type de pièce.
+- **Respecté** : On peut ajouter de nouvelles pièces (ex : Cavalier) sans modifier le code existant grâce à l'**INTROSPECTION** (cf polymorphisme d'**introspection** et **paramétrique**) : on peut faire `List<Piece> pieces = new ArrayList<>()` et ajouter n'importe quelle pièce qui implémente l'interface Piece, sans se soucier de la classe concrète (ex : `pieces.add(new Cavalier())`).
 
 ### Liskov
-- Chaque pièce (ex : Roi, Reine, etc.) est une sous classe de la classe abstraite Piece, et peut être substituée à une référence de type Piece sans problème (ex : Piece p = new Roi();)
+- Chaque pièce (ex : Roi, Reine, etc.) est une sous classe de la classe abstraite Piece, et peut être substituée à une référence de type Piece sans problème 
+**Respecté** : (ex : `Piece p = new Roi();`)
     ==>Chaque pièce implémente la méthode isAlgoMoveOk() de manière spécifique, mais on peut toujours appeler isMoveOk() sur une référence de type Piece sans se soucier de la classe concrète (ex : Piece p = new Roi(); p.isMoveOk(...);)
-- Liste de pièces : List<Piece> pieces = new ArrayList<>() ou LinkedList<>() 
-- Mauvais exemple : toString() qui retourne "ok" au lieu d'une description de la pièce, ou qui retourne une description différente selon la classe (ex : "Roi" pour la classe Roi, "Reine" pour la classe Reine, etc.) ==> on peut faire mieux en utilisant une méthode getDescription() dans la classe Piece qui sera implémentée de manière spécifique dans chaque sous classe.
+- Liste de pièces : List<Piece> pieces = new ArrayList<>() ou LinkedList<>()
+
+- **Mauvais exemple** (spéculation) : toString() qui retourne "ok" au lieu d'une description de la pièce, ou qui retourne une description différente selon la classe (ex : "Roi" pour la classe Roi, "Reine" pour la classe Reine, etc.) ==> on peut faire mieux en utilisant une méthode getDescription() dans la classe Piece qui sera implémentée de manière spécifique dans chaque sous classe.
+                                    Ou sous classe qui ovveride et modifie le contract, retourne des valeurs illogiques ou lève des exeptions non prévues.
 
 ### Interface Segregation
-- Pas d'interface "Dieu" avec 100 méthodes, chaque classe implémente uniquement les méthodes dont elle a besoin
+- Pas d'interface "Dieu" avec 100 méthodes, chaque classe implémente uniquement les méthodes dont elle a besoin.
+- **Respecté** : Echiquier implémente une interface BoardGame avec des méthodes spécifiques au jeu d'échecs (ex : movePiece(), isCheck(), etc.) et les pièces implémentent une interface Piece avec des méthodes spécifiques à leur comportement (ex : isAlgoMoveOk(), getDescription(), etc.)
+- **Respecté** : Tour ne dépend pas de la méthode d'un Pion : isCaptureMove().
+- **Mauvais exemple** (spéculation) : une interface "Piece" avec 100 méthodes, alors que la classe "Fou" n'en utilise que 10.
 
 ### Dependency Inversion
-- La classe monde, l'arbitre (Echiquier) dépend d'une interface (BoardGame) et pas d'implémentation concrète (Pièce...)
+-**Respecté** : La classe monde, l'arbitre (Echiquier) dépend d'une interface (BoardGame) et pas d'implémentation concrète (Pièce...)
+- **Mauvais exemple** : La classe Echiquier, dans isSquareAttacked() doit chek les instances (cavalier, pion, etc.) pour vérifier si une pièce attaque une case, alors qu'elle pourrait déléguer cette responsabilité à la pièce elle-même (ex : p.isAttackingSquare(...)).
+
+
+
+
+
+
+
+
+
 
 ---
-
 ---
 
 # COO - 5ème cours-TP
@@ -194,7 +206,7 @@ Utilisateur (drag/drop souris)
 ## En quoi le MVC (+ Observer/Subject) respecte les principes SOLID ?
 - **SRP** : Chaque composant a une responsabilité unique (Model = logique métier, View = affichage, Controller = liaison entre les deux).
 
-- **O/C** : On peut ajouter de nouvelles vues ou de nouveaux modèles sans modifier les autres composants (ex : ajouter une vue 3D sans toucher au modèle).
+- **O/C** : Grace aux interfaces `Observer` et `Observable` on peut ajouter de nouvelles vues ou de nouveaux modèles sans modifier les autres composants (ex : ajouter une `vue` 3D sans toucher au modèle `ChessGame`).
 Ouvert à l'extension : on peut ajouter de nouvelles fonctionnalités (ex : nouvelle pièce, nouvelle règle) en créant de nouvelles classes qui implémentent les interfaces existantes.
 Fermé au modification : on ne peut pas changer d'architecture (Observable <-> Observé), d'organisation, de constructeur ...
 
@@ -208,21 +220,6 @@ Update(Params = ListPiece**IHM**) : la vue reçoit une liste de pièces **à aff
 De même, le modèle peut notifier les changements d'état sans se soucier de qui sont les observers ou comment ils vont réagir.
 
 Donc on en retient 2 pour le **découplage** : SRP (chacun sa mission) et O/C (ajouter de nouvelles fonctionnalités sans modifier le code existant).
-
----
----
-
-# 30 AVRIL 2026
-## DESIGN PATTERNS 
-Revoir template methode (ex : isMoveOk() + isAlgoMoveOk()) 
-
-## OBSERVER & Observable
-![img.png](Observable_Observer.png)
-
----
-## Polymorphisme paramétrique
-- **Classe paramétrée** : classe qui peut être utilisée avec différents types de données (ex : List<T> en Java).
-- **Généricité** : capacité d'une classe ou d'une méthode à fonctionner avec différents types de données sans modification du code (ex : List<T> peut être utilisée pour List<String>, List<Integer>, etc.).
 
 
 ---
